@@ -37,20 +37,14 @@
     <div class="Deaths">Smierci: 0</div>
     <div class="Timer">Time: 00:00</div>
     <script>
+    // Zmienne deklarujemy TYLKO RAZ
     let Time = localStorage.getItem("timer_time") ? parseInt(localStorage.getItem("timer_time")) : 0;
     let Deaths = localStorage.getItem("Deaths_count") ? parseInt(localStorage.getItem("Deaths_count")) : 0;
     let isRunning = false;
     const display_deaths = document.querySelector(".Deaths");
     const display_time = document.querySelector(".Timer");
 
-    updateDisplay();
-
-    let Time = localStorage.getItem("timer_time") ? parseInt(localStorage.getItem("timer_time")) : 0;
-    let Deaths = localStorage.getItem("Deaths_count") ? parseInt(localStorage.getItem("Deaths_count")) : 0;
-    let isRunning = false;
-    const display_deaths = document.querySelector(".Deaths");
-    const display_time = document.querySelector(".Timer");
-
+    // Pierwsze odświeżenie widoku
     updateDisplay();
 
     function updateDisplay() {
@@ -80,16 +74,13 @@
         if (typeof ComfyJS !== "undefined") {
             ComfyJS.onCommand = (user, command, message, flags) => {
                 if (flags.broadcaster || flags.mod) {
-                    // Dodawanie/Odejmowanie po 1
                     if (command === "t+") { Deaths++; updateDisplay(); }
                     if (command === "t-") { Deaths--; updateDisplay(); }
                     
-                    // Sterowanie czasem
                     if (command === "tstart") isRunning = true;
                     if (command === "tstop") isRunning = false;
                     if (command === "treset") { Time = 0; updateDisplay(); }
 
-                    // Ustawianie konkretnej liczby śmierci (np. !tsetdeaths 15)
                     if (command === "tsetdeaths" || command === "t++") {
                         let howMany = parseInt(message);
                         if (!isNaN(howMany)) {
@@ -98,7 +89,6 @@
                         }
                     }
 
-                    // Ustawianie czasu (np. !tset 10:00)
                     if (command === "tset") {
                         let totalSeconds = 0;
                         if (message.includes(":")) {
@@ -124,10 +114,11 @@
 
     setInterval(TimeUp, 1000);
     connectTwitch();
-    </script>
+</script>
 </body>
 
 </html>
+
 
 
 
