@@ -45,6 +45,14 @@
 
     updateDisplay();
 
+    let Time = localStorage.getItem("timer_time") ? parseInt(localStorage.getItem("timer_time")) : 0;
+    let Deaths = localStorage.getItem("Deaths_count") ? parseInt(localStorage.getItem("Deaths_count")) : 0;
+    let isRunning = false;
+    const display_deaths = document.querySelector(".Deaths");
+    const display_time = document.querySelector(".Timer");
+
+    updateDisplay();
+
     function updateDisplay() {
         let h = Math.floor(Time / 3600);
         let m = Math.floor((Time % 3600) / 60);
@@ -56,7 +64,6 @@
 
         display_deaths.textContent = "Smierci: " + Deaths;
         display_time.textContent = "Time: " + hDisplay + mDisplay + sDisplay;
-        
 
         localStorage.setItem("Deaths_count", Deaths);
         localStorage.setItem("timer_time", Time);
@@ -73,28 +80,25 @@
         if (typeof ComfyJS !== "undefined") {
             ComfyJS.onCommand = (user, command, message, flags) => {
                 if (flags.broadcaster || flags.mod) {
-                    if (command === "t+") Deaths++; updateDisplay();
-                    if (command === "t-") Deaths--; updateDisplay();
+                    // Dodawanie/Odejmowanie po 1
+                    if (command === "t+") { Deaths++; updateDisplay(); }
+                    if (command === "t-") { Deaths--; updateDisplay(); }
+                    
+                    // Sterowanie czasem
                     if (command === "tstart") isRunning = true;
                     if (command === "tstop") isRunning = false;
-                    if (command === "treset") { 
-                        Time = 0; 
-                        updateDisplay(); 
-                    }
-                    if (command === "t++") {
-                        if(message.includes(Number)){
-                            const HowMuchDeaths = message.map(Number)};
-                        }
-                        else{
-                            HowMuchDeaths = parseInt(message)
-                        }
-                        if (!isNaN(HowMuchDeaths)) {
-                            Deaths = HowMuchDeaths;
+                    if (command === "treset") { Time = 0; updateDisplay(); }
+
+                    // Ustawianie konkretnej liczby śmierci (np. !tsetdeaths 15)
+                    if (command === "tsetdeaths" || command === "t++") {
+                        let howMany = parseInt(message);
+                        if (!isNaN(howMany)) {
+                            Deaths = howMany;
                             updateDisplay();
                         }
+                    }
 
-
-                    }}
+                    // Ustawianie czasu (np. !tset 10:00)
                     if (command === "tset") {
                         let totalSeconds = 0;
                         if (message.includes(":")) {
@@ -124,6 +128,7 @@
 </body>
 
 </html>
+
 
 
 
