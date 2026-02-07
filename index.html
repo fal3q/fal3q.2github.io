@@ -134,14 +134,6 @@
                     if (command === "tstop") isRunning = false;
                     if (command === "tbossstart") {
                         if (message !== "") {
-                            if(NameBoss == ""){
-                                document.querySelector(".Boss").style.visibility = "visible";
-                                let bossname = message;
-                                NameBoss = bossname;
-                                isRunningBoss = true;
-                                updateDisplay();
-                                }
-                            else{
                                 document.querySelector(".Boss").style.visibility = "visible";
                                 let bossname = message;
                                 NameBoss = bossname;
@@ -149,7 +141,7 @@
                                 TimeBoss = 0;
                                 isRunningBoss = true;
                                 updateDisplay();
-                            }
+                            
                             }
                             else{
                                 isRunningBoss = true;
