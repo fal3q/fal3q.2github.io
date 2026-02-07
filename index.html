@@ -133,22 +133,29 @@
                     if (command === "tstart") isRunning = true;
                     if (command === "tstop") isRunning = false;
                     if (command === "tbossstart") {
-                        if(NameBoss == ""){
-                            document.querySelector(".Boss").style.visibility = "visible";
-                            let bossname = message;
-                            NameBoss = bossname;
-                            isRunningBoss = true;
-                            updateDisplay();
+                        if (message !== "") {
+                            if(NameBoss == ""){
+                                document.querySelector(".Boss").style.visibility = "visible";
+                                let bossname = message;
+                                NameBoss = bossname;
+                                isRunningBoss = true;
+                                updateDisplay();
+                                }
+                            else{
+                                document.querySelector(".Boss").style.visibility = "visible";
+                                let bossname = message;
+                                NameBoss = bossname;
+                                DeathsBoss = 0;
+                                TimeBoss = 0;
+                                isRunningBoss = true;
+                                updateDisplay();
                             }
-                        else{
-                            document.querySelector(".Boss").style.visibility = "visible";
-                            let bossname = message;
-                            NameBoss = bossname;
-                            DeathsBoss = 0;
-                            TimeBoss = 0;
-                            isRunningBoss = true;
-                            updateDisplay();
-                        }
+                            }
+                            else{
+                                isRunningBoss = true;
+                                updateDisplay();
+                            }
+                        
                         }
                     if (command === "tsetdeaths" || command === "t++") {
                             let howMany = parseInt(message);
@@ -210,17 +217,4 @@
 </body>
 
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
 
