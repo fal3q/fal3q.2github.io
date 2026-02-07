@@ -31,20 +31,46 @@
             letter-spacing: 5px;
             font-family: 'MC-font', serif;
         }
+        .Boss{
+            margin-top: 15px;
+
+        }
+        .TimerBoss, .DeathsBoss{
+            color: white;
+            -webkit-text-stroke: 3px black;
+            font-size: 90px;
+            letter-spacing: 5px;
+            font-family: 'MC-font', serif;
+        }
     </style>
 </head>
 <body>
     <div class="Deaths">Smierci: 0</div>
     <div class="Timer">Time: 00:00</div>
+    <div class="Boss" style="visibility: hidden;">
+        <div class="NameBoss"></div>
+        <div class="DeathsBoss"></div>
+        <div class="TimerBoss"></div>
+    </div>
     <script>
-    // Zmienne deklarujemy TYLKO RAZ
+        //Glowny Timer + śmierci
     let Time = localStorage.getItem("timer_time") ? parseInt(localStorage.getItem("timer_time")) : 0;
     let Deaths = localStorage.getItem("Deaths_count") ? parseInt(localStorage.getItem("Deaths_count")) : 0;
     let isRunning = false;
     const display_deaths = document.querySelector(".Deaths");
     const display_time = document.querySelector(".Timer");
+    
+    
+        //Boss Timer + śmierci
+    let NameBoss = localStorage.getItem("timerBoss_name") ? parseInt(localStorage.getItem("timerBoss_name")) : 0;
+    let TimeBoss = localStorage.getItem("timerBoss_time") ? parseInt(localStorage.getItem("timerBoss_time")) : 0;
+    let DeathsBoss = localStorage.getItem("DeathsBoss_count") ? parseInt(localStorage.getItem("DeathsBoss_count")) : 0;
+    let isRunningBoss = false;
+    const display_name_boss = document.querySelector(".NameBoss");
+    const display_deaths_boss = document.querySelector(".DeathsBoss");
+    const display_time_boss = document.querySelector(".TimerBoss");
 
-    // Pierwsze odświeżenie widoku
+
     updateDisplay();
 
     function updateDisplay() {
@@ -61,6 +87,26 @@
 
         localStorage.setItem("Deaths_count", Deaths);
         localStorage.setItem("timer_time", Time);
+       
+        
+        
+        if (document.querySelector(".Boss").style.visibility === "visible") {
+                let hBoss = Math.floor(TimeBoss / 3600);
+                let mBoss = Math.floor((TimeBoss % 3600) / 60);
+                let sBoss = Math.floor(TimeBoss % 60);
+                
+                let hDisplayBoss = h > 0 ? (h < 10 ? '0' + h : h) + ":" : "";
+                let mDisplayBoss = (m < 10 ? '0' + m : m) + ":";
+                let sDisplayBoss = s < 10 ? '0' + s : s;
+
+                localStorage.setItem("timerBoss_name",NameBoss)
+                localStorage.setItem("DeathsBoss_count", DeathsBoss);
+                localStorage.setItem("timerBoss_time", TimeBoss);
+                
+                display_name_boss.textContent = "Boss: " + NameBoss
+                display_deaths_boss.textContent = "Smierci: " + DeathsBoss;
+                display_time_boss.textContent = "Time: " + hDisplayBoss + mDisplayBoss + sDisplayBoss;
+            }
     }
 
     function TimeUp() {
@@ -68,43 +114,58 @@
             Time++;
             updateDisplay();
         }
+        if (document.querySelector(".Boss").style.visibility === "visible") {
+            if (isRunningBoss) {
+                TimeBoss++;
+                updateDisplay();
+            }
+        }
     }
 
     function connectTwitch() {
         if (typeof ComfyJS !== "undefined") {
             ComfyJS.onCommand = (user, command, message, flags) => {
                 if (flags.broadcaster || flags.mod) {
-                    if (command === "t+") { Deaths++; updateDisplay(); }
-                    if (command === "t-") { Deaths--; updateDisplay(); }
-                    
-                    if (command === "tstart") isRunning = true;
-                    if (command === "tstop") isRunning = false;
-                    if (command === "treset") { Time = 0; updateDisplay(); }
-
-                    if (command === "tsetdeaths" || command === "t++") {
-                        let howMany = parseInt(message);
-                        if (!isNaN(howMany)) {
-                            Deaths = howMany;
-                            updateDisplay();
-                        }
-                    }
-
-                    if (command === "tset") {
-                        let totalSeconds = 0;
-                        if (message.includes(":")) {
-                            const parts = message.split(":").map(Number);
-                            if (parts.length === 3) totalSeconds = (parts[0] * 3600) + (parts[1] * 60) + parts[2];
-                            else if (parts.length === 2) totalSeconds = (parts[0] * 60) + parts[1];
-                        } else {
-                            totalSeconds = parseInt(message);
-                        }
+                    if (document.querySelector(".Boss").style.visibility === "visible") {
+                        if (command === "t+") { Deaths++; DeathsBoss++; updateDisplay(); }
+                        if (command === "t-") { Deaths--; display_deaths_boss--; updateDisplay(); }
                         
-                        if (!isNaN(totalSeconds)) { 
-                            Time = totalSeconds; 
-                            updateDisplay(); 
+                        if (command === "tstart") isRunning = true;
+                        if (command === "tstop") isRunning = false;
+                        if (command === "treset") { Time = 0; updateDisplay(); }
+
+                        if (command === "tsetdeaths" || command === "t++") {
+                            let howMany = parseInt(message);
+                            if (!isNaN(howMany)) {
+                                Deaths = howMany;
+                                updateDisplay();
+                            }
                         }
-                    }
-                }
+
+                        if (command === "tset") {
+                            let totalSeconds = 0;
+                            if (message.includes(":")) {
+                                const parts = message.split(":").map(Number);
+                                if (parts.length === 3) totalSeconds = (parts[0] * 3600) + (parts[1] * 60) + parts[2];
+                                else if (parts.length === 2) totalSeconds = (parts[0] * 60) + parts[1];
+                            } else {
+                                totalSeconds = parseInt(message);
+                            }
+                            
+                            if (!isNaN(totalSeconds)) { 
+                                Time = totalSeconds; 
+                                updateDisplay(); 
+                            }
+                        }
+                        if (command === "tboss start") {
+                            document.querySelector(".Boss").style.visibility = "visible";
+                            let bossname = toString(message);
+                            NameBoss = bossname;
+                            isRunningBoss = true;
+                            updateDisplay();
+
+                        }
+                }}
             };
             ComfyJS.Init("damiano00o");
         } else {
@@ -118,7 +179,6 @@
 </body>
 
 </html>
-
 
 
 
