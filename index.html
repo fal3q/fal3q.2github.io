@@ -157,13 +157,15 @@
                                 updateDisplay(); 
                             }
                         }
-                        if (command === "tbossstart") {
+                        else{
+                            if (command === "tbossstart") {
                             document.querySelector(".Boss").style.visibility = "visible";
                             let bossname = toString(message);
                             NameBoss = bossname;
                             isRunningBoss = true;
                             updateDisplay();
 
+                        }
                         }
                 }}
             };
@@ -179,6 +181,7 @@
 </body>
 
 </html>
+
 
 
 
