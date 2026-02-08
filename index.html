@@ -67,15 +67,15 @@
     const display_deaths_boss = document.querySelector(".DeathsBoss");
     const display_time_boss = document.querySelector(".TimerBoss");
 
-    // Na start: Pokazujemy tylko jeśli nazwa nie jest pusta
-    if (NameBoss && NameBoss.trim() !== "") {
+    // Startowa weryfikacja
+    if (NameBoss && NameBoss.trim().length > 0) {
         fullboss.style.visibility = "visible";
     }
 
     updateDisplay();
 
     function updateDisplay() {
-        // Główny licznik
+        // Logika wyświetlania czasu głównego
         let h = Math.floor(Time / 3600);
         let m = Math.floor((Time % 3600) / 60);
         let s = Math.floor(Time % 60);
@@ -89,10 +89,15 @@
         localStorage.setItem("Deaths_count", Deaths);
         localStorage.setItem("timer_time", Time);
         
-        // Licznik Bossa
+        // Logika wyświetlania Bossa
         if (fullboss.style.visibility === "visible") {
-            // TUTAJ: Piszemy "Boss: " TYLKO jeśli NameBoss ma sensowną treść
-            if (NameBoss && NameBoss.trim() !== "") {
+            // ZABEZPIECZENIE: Jeśli NameBoss jest puste, spróbuj odzyskać z pamięci
+            if (!NameBoss || NameBoss.trim().length === 0) {
+                NameBoss = localStorage.getItem("timerBoss_name") || "";
+            }
+
+            // Rysuj nazwę tylko jeśli faktycznie ją mamy
+            if (NameBoss && NameBoss.trim().length > 0) {
                 display_name_boss.textContent = "Boss: " + NameBoss;
                 localStorage.setItem("timerBoss_name", NameBoss);
             }
@@ -124,22 +129,24 @@
                 if (flags.broadcaster || flags.mod) {
                     
                     if (command === "tbossstart") {
-                        // KROK 1: Sprawdzamy czy message ma litery
-                        let validMessage = message && message.trim().length > 0;
+                        // FILTR PANCERNY: Akceptuj tylko wiadomości, które mają realną treść (min. 1 znak nie-spacji)
+                        const isNewNameProvided = message && message.trim().length > 0;
 
-                        if (validMessage) {
-                            // Jeśli wpisałeś np. !tbossstart Skeletron
-                            NameBoss = message;
+                        if (isNewNameProvided) {
+                            // Ustawiamy nowego bossa
+                            NameBoss = message; 
                             DeathsBoss = 0;
                             TimeBoss = 0;
                             isRunningBoss = true;
                             fullboss.style.visibility = "visible";
+                            localStorage.setItem("timerBoss_name", NameBoss);
                         } else {
-                            // Jeśli wpisałeś samo !tbossstart
-                            // TYLKO jeśli już mamy zapisanego jakiegoś bossa, to go odpalamy
-                            if (NameBoss && NameBoss.trim() !== "") {
-                                isRunningBoss = true;
+                            // Puste !tbossstart - TYLKO wznawiamy jeśli nazwa już istnieje w zmiennej LUB localStorage
+                            let savedName = NameBoss || localStorage.getItem("timerBoss_name");
+                            if (savedName && savedName.trim().length > 0) {
+                                NameBoss = savedName; // Przywróć na wypadek gdyby JS ją zgubił
                                 fullboss.style.visibility = "visible";
+                                isRunningBoss = true;
                             }
                         }
                         updateDisplay();
@@ -147,13 +154,13 @@
 
                     if (command === "tbossstop") {
                         fullboss.style.visibility = "hidden";
-                        NameBoss = ""; // Czyścimy zmienną
                         isRunningBoss = false;
-                        localStorage.setItem("timerBoss_name", ""); // Czyścimy pamięć
+                        NameBoss = "";
+                        localStorage.setItem("timerBoss_name", ""); // Tutaj JEDYNE miejsce gdzie czyścimy pamięć
                         updateDisplay();
                     }
 
-                    // --- TWOJE POZOSTAŁE KOMENDY (bez zmian logicznych) ---
+                    // --- Pozostałe komendy bez zmian w Twojej logice ---
                     if (command === "tstart") {
                         isRunning = true;
                         if (fullboss.style.visibility === "visible") isRunningBoss = true;
@@ -164,10 +171,11 @@
                     }
                     if (command === "tbosspause") {
                         isRunningBoss = false;
+                        updateDisplay();
                     }
                     if (command === "tsetdeaths" || command === "t++") {
                         let val = parseInt(message);
-                        if (!isNaN(val)) Deaths = val;
+                        if (!isNaN(val)) { Deaths = val; updateDisplay(); }
                     }
                     if (command === "tset") {
                         let totalSeconds = 0;
@@ -178,21 +186,23 @@
                         } else {
                             totalSeconds = parseInt(message);
                         }
-                        if (!isNaN(totalSeconds)) Time = totalSeconds;
+                        if (!isNaN(totalSeconds)) { Time = totalSeconds; updateDisplay(); }
                     }
                     if (command === "t+") {
                         Deaths++;
                         if (fullboss.style.visibility === "visible") DeathsBoss++;
+                        updateDisplay();
                     }
                     if (command === "t-") {
                         if (Deaths > 0) Deaths--;
                         if (fullboss.style.visibility === "visible" && DeathsBoss > 0) DeathsBoss--;
+                        updateDisplay();
                     }
                     if (command === "treset") {
                         Time = 0;
                         if (fullboss.style.visibility === "visible") TimeBoss = 0;
+                        updateDisplay();
                     }
-                    updateDisplay();
                 }
             };
             ComfyJS.Init("damiano00o");
