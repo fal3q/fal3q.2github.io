@@ -134,10 +134,15 @@
                     if (command === "tstart") {
                         isRunning = true;
                         if (document.querySelector(".Boss").style.visibility === "visible") {
-                            isRunningBoss = true
+                            isRunningBoss = true;
                         }
                     }
-                    if (command === "tstop") isRunning = false;
+                    if (command === "tstop"){
+                        isRunning = false;
+                        if (document.querySelector(".Boss").style.visibility === "visible") {
+                            isRunningBoss = false;
+                        }
+                    }
                     if (command === "tbossstart") {
                         if (message !== "") {
                                 document.querySelector(".Boss").style.visibility = "visible";
@@ -226,4 +231,5 @@
 </body>
 
 </html>
+
 
