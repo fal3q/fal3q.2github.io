@@ -144,7 +144,7 @@
                         }
                     }
                     if (command === "tbossstart") {
-                        if (message !== "") {
+                        if (message !== null) {
                                 document.querySelector(".Boss").style.visibility = "visible";
                                 let bossname = message;
                                 NameBoss = bossname;
@@ -154,7 +154,7 @@
                                 updateDisplay();
                             
                             }
-                            else{
+                            if (message == null){
                                 isRunningBoss = true;
                                 updateDisplay();
                             }
@@ -231,5 +231,4 @@
 </body>
 
 </html>
-
 
