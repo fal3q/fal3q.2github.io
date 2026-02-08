@@ -71,8 +71,8 @@
     const display_deaths_boss = document.querySelector(".DeathsBoss");
     const display_time_boss = document.querySelector(".TimerBoss");
 
-    // Startowe ustawienie widoczności - tylko jeśli nazwa faktycznie ISTNIEJE
-    if (NameBoss && NameBoss.trim().length > 0) {
+    // Startowe sprawdzenie (pancerny warunek)
+    if (NameBoss && typeof NameBoss === 'string' && NameBoss.trim() !== "") {
         fullboss.style.visibility = "visible";
     } else {
         fullboss.style.visibility = "hidden";
@@ -95,10 +95,10 @@
         localStorage.setItem("Deaths_count", Deaths);
         localStorage.setItem("timer_time", Time);
         
-        // Czas Bossa - Blokada pustej nazwy
+        // Sekcja Bossa
         if (fullboss.style.visibility === "visible") {
-            // Jeśli jakimś cudem NameBoss jest puste w tej linii, nie aktualizujemy tekstu
-            if (NameBoss && NameBoss.trim().length > 0) {
+            // Wyświetlamy nazwę tylko jeśli nie jest "pusta"
+            if (NameBoss && NameBoss.trim() !== "") {
                 display_name_boss.textContent = "Boss: " + NameBoss;
                 localStorage.setItem("timerBoss_name", NameBoss);
             }
@@ -128,6 +128,29 @@
         if (typeof ComfyJS !== "undefined") {
             ComfyJS.onCommand = (user, command, message, flags) => {
                 if (flags.broadcaster || flags.mod) {
+                    
+                    if (command === "tbossstart") {
+                        // REWOLUCJA TUTAJ: Sprawdzamy wiadomość ZANIM cokolwiek przypiszemy
+                        const hasContent = message && message.trim().length > 0;
+
+                        if (hasContent) {
+                            // Nowy boss - tylko jeśli message ma treść!
+                            NameBoss = message; 
+                            DeathsBoss = 0;
+                            TimeBoss = 0;
+                            isRunningBoss = true;
+                            fullboss.style.visibility = "visible";
+                        } else {
+                            // Puste !tbossstart - jeśli boss już "istnieje", po prostu go pokazujemy
+                            if (NameBoss && NameBoss.trim() !== "") {
+                                isRunningBoss = true;
+                                fullboss.style.visibility = "visible";
+                            }
+                        }
+                        updateDisplay();
+                    }
+
+                    // --- RESZTA KOMEND BEZ ZMIAN W LOGICE ---
                     if (command === "tstart") {
                         isRunning = true;
                         if (fullboss.style.visibility === "visible") isRunningBoss = true;
@@ -135,26 +158,6 @@
                     if (command === "tstop") {
                         isRunning = false;
                         isRunningBoss = false;
-                    }
-                    if (command === "tbossstart") {
-                        // Kluczowy filtr:
-                        let cleanMessage = message ? message.trim() : "";
-                        
-                        if (cleanMessage.length > 0) {
-                            // Nowy boss
-                            NameBoss = message; // Zachowuje spacje w środku
-                            DeathsBoss = 0;
-                            TimeBoss = 0;
-                            isRunningBoss = true;
-                            fullboss.style.visibility = "visible";
-                        } else {
-                            // Pusta komenda - tylko jeśli już mamy kogoś w pamięci
-                            if (NameBoss && NameBoss.trim().length > 0) {
-                                isRunningBoss = true;
-                                fullboss.style.visibility = "visible";
-                            }
-                        }
-                        updateDisplay();
                     }
                     if (command === "tbossstop") {
                         fullboss.style.visibility = "hidden";
