@@ -145,19 +145,23 @@
                     }
                     if (command === "tbossstart") {
                         if (message && message.trim().length > 0) {
+                            document.querySelector(".Boss").style.visibility = "visible";
+                            NameBoss = message.trim();
+                            DeathsBoss = 0;
+                            TimeBoss = 0;
+                            isRunningBoss = true;
+                            updateDisplay();
+                        } else {
+                            if (NameBoss && NameBoss.trim().length > 0) {
                                 document.querySelector(".Boss").style.visibility = "visible";
-                                NameBoss = message.trim();
-                                DeathsBoss = 0;
-                                TimeBoss = 0;
                                 isRunningBoss = true;
                                 updateDisplay();
-                            
-                            }
-                            else{
-                                isRunningBoss = true;
-                                updateDisplay();
+                            } else {
+                                document.querySelector(".Boss").style.visibility = "hidden";
+                                isRunningBoss = false;
                             }
                         }
+                    }
                     if (command === "tbossstop") {
                         document.querySelector(".Boss").style.visibility = "hidden";
                         NameBoss = "";
