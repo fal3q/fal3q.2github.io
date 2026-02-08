@@ -131,7 +131,7 @@
                     
                     if (command === "tbossstart") {
                         const hasContent = message && message.trim().length > 0;
-                        if (isRunningBoss == true) {
+
                         if (hasContent) {
                             NameBoss = message; 
                             DeathsBoss = 0;
@@ -139,16 +139,13 @@
                             isRunningBoss = true;
                             fullboss.style.visibility = "visible";
                         } else {
+
                             if (NameBoss && NameBoss.trim() !== "") {
                                 isRunningBoss = true;
                                 fullboss.style.visibility = "visible";
                             }
                         }
                         updateDisplay();
-                    }
-                    else{
-                        return
-                    }
                     }
 
                     // --- RESZTA KOMEND BEZ ZMIAN W LOGICE ---
