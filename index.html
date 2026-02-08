@@ -144,14 +144,16 @@
                         }
                     }
                     if (command === "tbossstart") {
-                        if (message && message.trim().length > 0) {
+                        let trimmedMessage = message ? message.trim() : "";
+                        if (trimmedMessage.length > 0) {
                             document.querySelector(".Boss").style.visibility = "visible";
-                            NameBoss = message.trim();
+                            NameBoss = trimmedMessage;
                             DeathsBoss = 0;
                             TimeBoss = 0;
                             isRunningBoss = true;
                             updateDisplay();
-                        } else {
+                        } 
+                        else {
                             if (NameBoss && NameBoss.trim().length > 0) {
                                 document.querySelector(".Boss").style.visibility = "visible";
                                 isRunningBoss = true;
