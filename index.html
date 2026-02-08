@@ -54,16 +54,15 @@
         <div class="TimerBoss"></div>
     </div>
     <script>
-        //Glowny Timer + śmierci
+    // Glowny Timer + śmierci
     let Time = localStorage.getItem("timer_time") ? parseInt(localStorage.getItem("timer_time")) : 0;
     let Deaths = localStorage.getItem("Deaths_count") ? parseInt(localStorage.getItem("Deaths_count")) : 0;
     let isRunning = false;
     const display_deaths = document.querySelector(".Deaths");
     const display_time = document.querySelector(".Timer");
     
-    
-        //Boss Timer + śmierci
-    let NameBoss = localStorage.getItem("timerBoss_name") || "" ;
+    // Boss Timer + śmierci
+    let NameBoss = localStorage.getItem("timerBoss_name") || "";
     let TimeBoss = localStorage.getItem("timerBoss_time") ? parseInt(localStorage.getItem("timerBoss_time")) : 0;
     let DeathsBoss = localStorage.getItem("DeathsBoss_count") ? parseInt(localStorage.getItem("DeathsBoss_count")) : 0;
     let isRunningBoss = false;
@@ -72,7 +71,7 @@
     const display_deaths_boss = document.querySelector(".DeathsBoss");
     const display_time_boss = document.querySelector(".TimerBoss");
 
-    if (NameBoss !== "") {
+    if (NameBoss && NameBoss.trim() !== "") {
         fullboss.style.visibility = "visible";
     }
 
@@ -92,39 +91,34 @@
 
         localStorage.setItem("Deaths_count", Deaths);
         localStorage.setItem("timer_time", Time);
-       
         
-        
-        if (document.querySelector(".Boss").style.visibility === "visible") {
-                let hBoss = Math.floor(TimeBoss / 3600);
-                let mBoss = Math.floor((TimeBoss % 3600) / 60);
-                let sBoss = Math.floor(TimeBoss % 60);
-                
-                let hDisplayBoss = hBoss > 0 ? (hBoss < 10 ? '0' + hBoss : hBoss) + ":" : "";
-                let mDisplayBoss = (mBoss < 10 ? '0' + mBoss : mBoss) + ":";
-                let sDisplayBoss = sBoss < 10 ? '0' + sBoss : sBoss;
+        if (fullboss.style.visibility === "visible") {
+            let hBoss = Math.floor(TimeBoss / 3600);
+            let mBoss = Math.floor((TimeBoss % 3600) / 60);
+            let sBoss = Math.floor(TimeBoss % 60);
+            
+            let hDisplayBoss = hBoss > 0 ? (hBoss < 10 ? '0' + hBoss : hBoss) + ":" : "";
+            let mDisplayBoss = (mBoss < 10 ? '0' + mBoss : mBoss) + ":";
+            let sDisplayBoss = sBoss < 10 ? '0' + sBoss : sBoss;
 
-                localStorage.setItem("timerBoss_name",NameBoss)
-                localStorage.setItem("DeathsBoss_count", DeathsBoss);
-                localStorage.setItem("timerBoss_time", TimeBoss);
-                
-                display_name_boss.textContent = "Boss: " + NameBoss
-                display_deaths_boss.textContent = "Smierci: " + DeathsBoss;
-                display_time_boss.textContent = "Time: " + hDisplayBoss + mDisplayBoss + sDisplayBoss;
-            }
+            localStorage.setItem("timerBoss_name", NameBoss);
+            localStorage.setItem("DeathsBoss_count", DeathsBoss);
+            localStorage.setItem("timerBoss_time", TimeBoss);
+            
+            display_name_boss.textContent = "Boss: " + NameBoss;
+            display_deaths_boss.textContent = "Smierci: " + DeathsBoss;
+            display_time_boss.textContent = "Time: " + hDisplayBoss + mDisplayBoss + sDisplayBoss;
+        }
     }
 
     function TimeUp() {
         if (isRunning) {
             Time++;
-            updateDisplay();
         }
-        if (document.querySelector(".Boss").style.visibility === "visible") {
-            if (isRunningBoss) {
-                TimeBoss++;
-                updateDisplay();
-            }
+        if (fullboss.style.visibility === "visible" && isRunningBoss) {
+            TimeBoss++;
         }
+        updateDisplay();
     }
 
     function connectTwitch() {
@@ -133,93 +127,71 @@
                 if (flags.broadcaster || flags.mod) {
                     if (command === "tstart") {
                         isRunning = true;
-                        if (document.querySelector(".Boss").style.visibility === "visible") {
-                            isRunningBoss = true;
-                        }
+                        if (fullboss.style.visibility === "visible") isRunningBoss = true;
                     }
-                    if (command === "tstop"){
+                    if (command === "tstop") {
                         isRunning = false;
-                        if (document.querySelector(".Boss").style.visibility === "visible") {
-                            isRunningBoss = false;
-                        }
+                        isRunningBoss = false;
                     }
                     if (command === "tbossstart") {
-                            if (message && message.trim().length > 0) {
-                                NameBoss = message; 
-                                DeathsBoss = 0;
-                                TimeBoss = 0;
+                        if (message && message.trim().length > 0) {
+                            fullboss.style.visibility = "visible";
+                            NameBoss = message; 
+                            DeathsBoss = 0;
+                            TimeBoss = 0;
+                            isRunningBoss = true;
+                        } else {
+                            if (NameBoss && NameBoss.trim().length > 0) {
+                                fullboss.style.visibility = "visible";
                                 isRunningBoss = true;
-                                document.querySelector(".Boss").style.visibility = "visible";
-                            } else {
-                                if (NameBoss && NameBoss.trim().length > 0) {
-                                    isRunningBoss = true;
-                                    document.querySelector(".Boss").style.visibility = "visible";
-                                } else {
-                                    document.querySelector(".Boss").style.visibility = "hidden";
-                                    isRunningBoss = false;
-                                }
                             }
-                            updateDisplay();
                         }
+                        updateDisplay();
+                    }
                     if (command === "tbossstop") {
-                        document.querySelector(".Boss").style.visibility = "hidden";
+                        fullboss.style.visibility = "hidden";
                         NameBoss = "";
                         DeathsBoss = 0;
                         TimeBoss = 0;
                         isRunningBoss = false;
+                        localStorage.setItem("timerBoss_name", "");
                         updateDisplay();
                     }
-                    if (command === "tbosspause"){
+                    if (command === "tbosspause") {
                         isRunningBoss = false;
                         updateDisplay();
                     }
                     if (command === "tsetdeaths" || command === "t++") {
-                            let howMany = parseInt(message);
-                            if (!isNaN(howMany)) {
-                                Deaths = howMany;
-                                updateDisplay();
-                            }
-                        }
-
-                    if (command === "tset") {
-                            let totalSeconds = 0;
-                            if (message.includes(":")) {
-                                const parts = message.split(":").map(Number);
-                                if (parts.length === 3) totalSeconds = (parts[0] * 3600) + (parts[1] * 60) + parts[2];
-                                else if (parts.length === 2) totalSeconds = (parts[0] * 60) + parts[1];
-                            } else {
-                                totalSeconds = parseInt(message);
-                            }
-                            
-                            if (!isNaN(totalSeconds)) { 
-                                Time = totalSeconds; 
-                                updateDisplay(); 
-                            }}
-                    if (command === "t+"){
-                        if (document.querySelector(".Boss").style.visibility === "visible") {  
-                            Deaths++; DeathsBoss++; updateDisplay();
-                        }
-                        else{
-                            Deaths++; updateDisplay();
-                        }
+                        let howMany = parseInt(message);
+                        if (!isNaN(howMany)) { Deaths = howMany; updateDisplay(); }
                     }
-                    
-                    if (command === "t-") { 
-                        if (document.querySelector(".Boss").style.visibility === "visible") {  
-                        Deaths--; DeathsBoss--; updateDisplay(); 
+                    if (command === "tset") {
+                        let totalSeconds = 0;
+                        if (message.includes(":")) {
+                            const parts = message.split(":").map(Number);
+                            if (parts.length === 3) totalSeconds = (parts[0] * 3600) + (parts[1] * 60) + parts[2];
+                            else if (parts.length === 2) totalSeconds = (parts[0] * 60) + parts[1];
+                        } else {
+                            totalSeconds = parseInt(message);
                         }
-                        else{
-                            Deaths--; updateDisplay();
-                        }
+                        if (!isNaN(totalSeconds)) { Time = totalSeconds; updateDisplay(); }
+                    }
+                    if (command === "t+") {
+                        if (fullboss.style.visibility === "visible") { Deaths++; DeathsBoss++; }
+                        else { Deaths++; }
+                        updateDisplay();
+                    }
+                    if (command === "t-") {
+                        if (fullboss.style.visibility === "visible") { Deaths--; DeathsBoss--; }
+                        else { Deaths--; }
+                        updateDisplay();
                     }
                     if (command === "treset") {
-                        if (document.querySelector(".Boss").style.visibility === "visible") {  
-                        Time = 0; TimeBoss = 0; updateDisplay(); 
-                        }
-                        else{
-                            Time = 0;updateDisplay();
-                        }}
-                   }
+                        if (fullboss.style.visibility === "visible") { Time = 0; TimeBoss = 0; }
+                        else { Time = 0; }
+                        updateDisplay();
+                    }
+                }
             };
             ComfyJS.Init("damiano00o");
         } else {
