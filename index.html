@@ -67,8 +67,11 @@
     const display_deaths_boss = document.querySelector(".DeathsBoss");
     const display_time_boss = document.querySelector(".TimerBoss");
 
-    if (NameBoss !== "") {
+    // Na starcie: pokazujemy tylko jeśli nazwa faktycznie jest w pamięci
+    if (NameBoss.trim() !== "") {
         fullboss.style.visibility = "visible";
+    } else {
+        fullboss.style.visibility = "hidden";
     }
 
     updateDisplay();
@@ -77,7 +80,6 @@
         let h = Math.floor(Time / 3600);
         let m = Math.floor((Time % 3600) / 60);
         let s = Math.floor(Time % 60);
-        
         let hDisplay = h > 0 ? (h < 10 ? '0' + h : h) + ":" : "";
         let mDisplay = (m < 10 ? '0' + m : m) + ":";
         let sDisplay = s < 10 ? '0' + s : s;
@@ -89,35 +91,34 @@
         localStorage.setItem("timer_time", Time);
         
         if (fullboss.style.visibility === "visible") {
+            // BLOKADA: Jeśli NameBoss jest puste, nie pozwól na update napisu "Boss: "
+            if (NameBoss.trim() !== "") {
+                display_name_boss.textContent = "Boss: " + NameBoss;
+                localStorage.setItem("timerBoss_name", NameBoss);
+            } else {
+                // Jeśli nazwa stała się pusta (np. po stopie), schowaj panel
+                fullboss.style.visibility = "hidden";
+            }
+
             let hBoss = Math.floor(TimeBoss / 3600);
             let mBoss = Math.floor((TimeBoss % 3600) / 60);
             let sBoss = Math.floor(TimeBoss % 60);
-            
             let hDisplayBoss = hBoss > 0 ? (hBoss < 10 ? '0' + hBoss : hBoss) + ":" : "";
             let mDisplayBoss = (mBoss < 10 ? '0' + mBoss : mBoss) + ":";
             let sDisplayBoss = sBoss < 10 ? '0' + sBoss : sBoss;
 
-            localStorage.setItem("timerBoss_name", NameBoss);
-            localStorage.setItem("DeathsBoss_count", DeathsBoss);
-            localStorage.setItem("timerBoss_time", TimeBoss);
-            
-            display_name_boss.textContent = "Boss: " + NameBoss;
             display_deaths_boss.textContent = "Smierci: " + DeathsBoss;
             display_time_boss.textContent = "Time: " + hDisplayBoss + mDisplayBoss + sDisplayBoss;
+            
+            localStorage.setItem("DeathsBoss_count", DeathsBoss);
+            localStorage.setItem("timerBoss_time", TimeBoss);
         }
     }
 
     function TimeUp() {
-        if (isRunning) {
-            Time++;
-            updateDisplay();
-        }
-        if (fullboss.style.visibility === "visible") {
-            if (isRunningBoss) {
-                TimeBoss++;
-                updateDisplay();
-            }
-        }
+        if (isRunning) Time++;
+        if (fullboss.style.visibility === "visible" && isRunningBoss) TimeBoss++;
+        updateDisplay();
     }
 
     function connectTwitch() {
@@ -126,32 +127,28 @@
                 if (flags.broadcaster || flags.mod) {
                     if (command === "tstart") {
                         isRunning = true;
-                        if (fullboss.style.visibility === "visible") {
-                            isRunningBoss = true;
-                        }
+                        if (fullboss.style.visibility === "visible") isRunningBoss = true;
                     }
                     if (command === "tstop") {
                         isRunning = false;
-                        if (fullboss.style.visibility === "visible") {
-                            isRunningBoss = false;
-                        }
+                        isRunningBoss = false;
                     }
                     if (command === "tbossstart") {
-                            if (message && message.trim().length > 0) {
-                                document.querySelector(".Boss").style.visibility = "visible";
-                                NameBoss = message;
-                                DeathsBoss = 0;
-                                TimeBoss = 0;
-                                isRunningBoss = true;
-                                updateDisplay();
-                            } else {
-                                if (NameBoss && NameBoss.trim().length > 0) {
-                                    document.querySelector(".Boss").style.visibility = "visible";
-                                    isRunningBoss = true;
-                                    updateDisplay();
-                                }
-                            }
+                        // Jeśli podano nową nazwę
+                        if (message && message.trim().length > 0) {
+                            NameBoss = message;
+                            DeathsBoss = 0;
+                            TimeBoss = 0;
+                            isRunningBoss = true;
+                            fullboss.style.visibility = "visible";
+                        } 
+                        // Jeśli NIE podano nazwy, a panel był ukryty, pokazujemy go tylko gdy mamy starą nazwę
+                        else if (NameBoss.trim() !== "") {
+                            fullboss.style.visibility = "visible";
+                            isRunningBoss = true;
                         }
+                        updateDisplay();
+                    }
                     if (command === "tbossstop") {
                         fullboss.style.visibility = "hidden";
                         NameBoss = "";
@@ -161,16 +158,13 @@
                         localStorage.setItem("timerBoss_name", ""); 
                         updateDisplay();
                     }
-                    if (command === "tbosspause"){
+                    if (command === "tbosspause") {
                         isRunningBoss = false;
                         updateDisplay();
                     }
                     if (command === "tsetdeaths" || command === "t++") {
-                        let howMany = parseInt(message);
-                        if (!isNaN(howMany)) {
-                            Deaths = howMany;
-                            updateDisplay();
-                        }
+                        let val = parseInt(message);
+                        if (!isNaN(val)) { Deaths = val; updateDisplay(); }
                     }
                     if (command === "tset") {
                         let totalSeconds = 0;
@@ -181,31 +175,22 @@
                         } else {
                             totalSeconds = parseInt(message);
                         }
-                        if (!isNaN(totalSeconds)) { 
-                            Time = totalSeconds; 
-                            updateDisplay(); 
-                        }
+                        if (!isNaN(totalSeconds)) { Time = totalSeconds; updateDisplay(); }
                     }
                     if (command === "t+") {
-                        if (fullboss.style.visibility === "visible") {  
-                            Deaths++; DeathsBoss++; updateDisplay();
-                        } else {
-                            Deaths++; updateDisplay();
-                        }
+                        Deaths++;
+                        if (fullboss.style.visibility === "visible") DeathsBoss++;
+                        updateDisplay();
                     }
                     if (command === "t-") { 
-                        if (fullboss.style.visibility === "visible") {  
-                            Deaths--; DeathsBoss--; updateDisplay(); 
-                        } else {
-                            Deaths--; updateDisplay();
-                        }
+                        if (Deaths > 0) Deaths--;
+                        if (fullboss.style.visibility === "visible" && DeathsBoss > 0) DeathsBoss--;
+                        updateDisplay();
                     }
                     if (command === "treset") {
-                        if (fullboss.style.visibility === "visible") {  
-                            Time = 0; TimeBoss = 0; updateDisplay(); 
-                        } else {
-                            Time = 0; updateDisplay();
-                        }
+                        Time = 0;
+                        if (fullboss.style.visibility === "visible") TimeBoss = 0;
+                        updateDisplay();
                     }
                 }
             };
