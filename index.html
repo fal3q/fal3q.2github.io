@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Timer</title>
+    
 
     <style>
         @font-face {
@@ -130,7 +131,12 @@
         if (typeof ComfyJS !== "undefined") {
             ComfyJS.onCommand = (user, command, message, flags) => {
                 if (flags.broadcaster || flags.mod) {
-                    if (command === "tstart") isRunning = true;
+                    if (command === "tstart") {
+                        isRunning = true;
+                        if (document.querySelector(".Boss").style.visibility === "visible") {
+                            isRunningBoss = true
+                        }
+                    }
                     if (command === "tstop") isRunning = false;
                     if (command === "tbossstart") {
                         if (message !== "") {
