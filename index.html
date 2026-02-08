@@ -71,8 +71,8 @@
     const display_deaths_boss = document.querySelector(".DeathsBoss");
     const display_time_boss = document.querySelector(".TimerBoss");
 
-    // Startowe sprawdzenie (pancerny warunek)
-    if (NameBoss && typeof NameBoss === 'string' && NameBoss.trim() !== "") {
+    // Startowe sprawdzenie widoczności
+    if (NameBoss && NameBoss.trim() !== "") {
         fullboss.style.visibility = "visible";
     } else {
         fullboss.style.visibility = "hidden";
@@ -96,13 +96,9 @@
         localStorage.setItem("timer_time", Time);
         
         // Sekcja Bossa
-        if (fullboss.style.visibility === "visible") {
-            // Wyświetlamy nazwę tylko jeśli nie jest "pusta"
-            if (NameBoss && NameBoss.trim() !== "") {
-                display_name_boss.textContent = "Boss: " + NameBoss;
-                localStorage.setItem("timerBoss_name", NameBoss);
-            }
-
+        if (fullboss.style.visibility === "visible" && NameBoss.trim() !== "") {
+            display_name_boss.textContent = "Boss: " + NameBoss;
+            
             let hBoss = Math.floor(TimeBoss / 3600);
             let mBoss = Math.floor((TimeBoss % 3600) / 60);
             let sBoss = Math.floor(TimeBoss % 60);
@@ -113,6 +109,7 @@
             display_deaths_boss.textContent = "Smierci: " + DeathsBoss;
             display_time_boss.textContent = "Time: " + hDisplayBoss + mDisplayBoss + sDisplayBoss;
             
+            localStorage.setItem("timerBoss_name", NameBoss);
             localStorage.setItem("DeathsBoss_count", DeathsBoss);
             localStorage.setItem("timerBoss_time", TimeBoss);
         }
@@ -133,82 +130,10 @@
                         const hasContent = message && message.trim().length > 0;
 
                         if (hasContent) {
-                            NameBoss = message; 
+                            // Ustawienie NOWEGO bossa (resetuje statystyki bossa)
+                            NameBoss = message.trim(); 
                             DeathsBoss = 0;
                             TimeBoss = 0;
-                            isRunningBoss = true;
-                            fullboss.style.visibility = "visible";
-                        } else {
-
-                            if (NameBoss && NameBoss.trim() !== "") {
-                                isRunningBoss = true;
-                                fullboss.style.visibility = "visible";
-                            }
-                        }
-                        updateDisplay();
-                    }
-
-                    // --- RESZTA KOMEND BEZ ZMIAN W LOGICE ---
-                    if (command === "tstart") {
-                        isRunning = true;
-                        if (fullboss.style.visibility === "visible") isRunningBoss = true;
-                    }
-                    if (command === "tstop") {
-                        isRunning = false;
-                        isRunningBoss = false;
-                    }
-                    if (command === "tbossstop") {
-                        fullboss.style.visibility = "hidden";
-                        isRunningBoss = false;
-                        NameBoss = "";
-                        localStorage.setItem("timerBoss_name", "");
-                        updateDisplay();
-                    }
-                    if (command === "tbosspause") {
-                        isRunningBoss = false;
-                        updateDisplay();
-                    }
-                    if (command === "tsetdeaths" || command === "t++") {
-                        let val = parseInt(message);
-                        if (!isNaN(val)) { Deaths = val; updateDisplay(); }
-                    }
-                    if (command === "tset") {
-                        let totalSeconds = 0;
-                        if (message.includes(":")) {
-                            const parts = message.split(":").map(Number);
-                            if (parts.length === 3) totalSeconds = (parts[0] * 3600) + (parts[1] * 60) + parts[2];
-                            else if (parts.length === 2) totalSeconds = (parts[0] * 60) + parts[1];
-                        } else {
-                            totalSeconds = parseInt(message);
-                        }
-                        if (!isNaN(totalSeconds)) { Time = totalSeconds; updateDisplay(); }
-                    }
-                    if (command === "t+") {
-                        Deaths++;
-                        if (fullboss.style.visibility === "visible") DeathsBoss++;
-                        updateDisplay();
-                    }
-                    if (command === "t-") {
-                        Deaths--;
-                        if (fullboss.style.visibility === "visible") DeathsBoss--;
-                        updateDisplay();
-                    }
-                    if (command === "treset") {
-                        Time = 0;
-                        if (fullboss.style.visibility === "visible") TimeBoss = 0;
-                        updateDisplay();
-                    }
-                }
-            };
-            ComfyJS.Init("damiano00o");
-        } else {
-            setTimeout(connectTwitch, 500);
-        }
-    }
-
-    setInterval(TimeUp, 1000);
-    connectTwitch();
-</script>
 </body>
 
 </html>
