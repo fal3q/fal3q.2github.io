@@ -53,7 +53,7 @@
         <div class="DeathsBoss"></div>
         <div class="TimerBoss"></div>
     </div>
-    <script>
+<script>
     // Glowny Timer + śmierci
     let Time = localStorage.getItem("timer_time") ? parseInt(localStorage.getItem("timer_time")) : 0;
     let Deaths = localStorage.getItem("Deaths_count") ? parseInt(localStorage.getItem("Deaths_count")) : 0;
@@ -71,17 +71,20 @@
     const display_deaths_boss = document.querySelector(".DeathsBoss");
     const display_time_boss = document.querySelector(".TimerBoss");
 
-    if (NameBoss && NameBoss.trim() !== "") {
+    // Startowe ustawienie widoczności - tylko jeśli nazwa faktycznie ISTNIEJE
+    if (NameBoss && NameBoss.trim().length > 0) {
         fullboss.style.visibility = "visible";
+    } else {
+        fullboss.style.visibility = "hidden";
     }
 
     updateDisplay();
 
     function updateDisplay() {
+        // Czas główny
         let h = Math.floor(Time / 3600);
         let m = Math.floor((Time % 3600) / 60);
         let s = Math.floor(Time % 60);
-        
         let hDisplay = h > 0 ? (h < 10 ? '0' + h : h) + ":" : "";
         let mDisplay = (m < 10 ? '0' + m : m) + ":";
         let sDisplay = s < 10 ? '0' + s : s;
@@ -92,32 +95,32 @@
         localStorage.setItem("Deaths_count", Deaths);
         localStorage.setItem("timer_time", Time);
         
+        // Czas Bossa - Blokada pustej nazwy
         if (fullboss.style.visibility === "visible") {
+            // Jeśli jakimś cudem NameBoss jest puste w tej linii, nie aktualizujemy tekstu
+            if (NameBoss && NameBoss.trim().length > 0) {
+                display_name_boss.textContent = "Boss: " + NameBoss;
+                localStorage.setItem("timerBoss_name", NameBoss);
+            }
+
             let hBoss = Math.floor(TimeBoss / 3600);
             let mBoss = Math.floor((TimeBoss % 3600) / 60);
             let sBoss = Math.floor(TimeBoss % 60);
-            
             let hDisplayBoss = hBoss > 0 ? (hBoss < 10 ? '0' + hBoss : hBoss) + ":" : "";
             let mDisplayBoss = (mBoss < 10 ? '0' + mBoss : mBoss) + ":";
             let sDisplayBoss = sBoss < 10 ? '0' + sBoss : sBoss;
 
-            localStorage.setItem("timerBoss_name", NameBoss);
-            localStorage.setItem("DeathsBoss_count", DeathsBoss);
-            localStorage.setItem("timerBoss_time", TimeBoss);
-            
-            display_name_boss.textContent = "Boss: " + NameBoss;
             display_deaths_boss.textContent = "Smierci: " + DeathsBoss;
             display_time_boss.textContent = "Time: " + hDisplayBoss + mDisplayBoss + sDisplayBoss;
+            
+            localStorage.setItem("DeathsBoss_count", DeathsBoss);
+            localStorage.setItem("timerBoss_time", TimeBoss);
         }
     }
 
     function TimeUp() {
-        if (isRunning) {
-            Time++;
-        }
-        if (fullboss.style.visibility === "visible" && isRunningBoss) {
-            TimeBoss++;
-        }
+        if (isRunning) Time++;
+        if (fullboss.style.visibility === "visible" && isRunningBoss) TimeBoss++;
         updateDisplay();
     }
 
@@ -134,26 +137,29 @@
                         isRunningBoss = false;
                     }
                     if (command === "tbossstart") {
-                        if (message && message.trim().length > 0) {
-                            fullboss.style.visibility = "visible";
-                            NameBoss = message; 
+                        // Kluczowy filtr:
+                        let cleanMessage = message ? message.trim() : "";
+                        
+                        if (cleanMessage.length > 0) {
+                            // Nowy boss
+                            NameBoss = message; // Zachowuje spacje w środku
                             DeathsBoss = 0;
                             TimeBoss = 0;
                             isRunningBoss = true;
+                            fullboss.style.visibility = "visible";
                         } else {
+                            // Pusta komenda - tylko jeśli już mamy kogoś w pamięci
                             if (NameBoss && NameBoss.trim().length > 0) {
-                                fullboss.style.visibility = "visible";
                                 isRunningBoss = true;
+                                fullboss.style.visibility = "visible";
                             }
                         }
                         updateDisplay();
                     }
                     if (command === "tbossstop") {
                         fullboss.style.visibility = "hidden";
-                        NameBoss = "";
-                        DeathsBoss = 0;
-                        TimeBoss = 0;
                         isRunningBoss = false;
+                        NameBoss = "";
                         localStorage.setItem("timerBoss_name", "");
                         updateDisplay();
                     }
@@ -162,8 +168,8 @@
                         updateDisplay();
                     }
                     if (command === "tsetdeaths" || command === "t++") {
-                        let howMany = parseInt(message);
-                        if (!isNaN(howMany)) { Deaths = howMany; updateDisplay(); }
+                        let val = parseInt(message);
+                        if (!isNaN(val)) { Deaths = val; updateDisplay(); }
                     }
                     if (command === "tset") {
                         let totalSeconds = 0;
@@ -177,18 +183,18 @@
                         if (!isNaN(totalSeconds)) { Time = totalSeconds; updateDisplay(); }
                     }
                     if (command === "t+") {
-                        if (fullboss.style.visibility === "visible") { Deaths++; DeathsBoss++; }
-                        else { Deaths++; }
+                        Deaths++;
+                        if (fullboss.style.visibility === "visible") DeathsBoss++;
                         updateDisplay();
                     }
                     if (command === "t-") {
-                        if (fullboss.style.visibility === "visible") { Deaths--; DeathsBoss--; }
-                        else { Deaths--; }
+                        Deaths--;
+                        if (fullboss.style.visibility === "visible") DeathsBoss--;
                         updateDisplay();
                     }
                     if (command === "treset") {
-                        if (fullboss.style.visibility === "visible") { Time = 0; TimeBoss = 0; }
-                        else { Time = 0; }
+                        Time = 0;
+                        if (fullboss.style.visibility === "visible") TimeBoss = 0;
                         updateDisplay();
                     }
                 }
