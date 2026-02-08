@@ -67,16 +67,15 @@
     const display_deaths_boss = document.querySelector(".DeathsBoss");
     const display_time_boss = document.querySelector(".TimerBoss");
 
-    // Na starcie: pokazujemy tylko jeśli nazwa faktycznie jest w pamięci
-    if (NameBoss.trim() !== "") {
+    // Na start: Pokazujemy tylko jeśli nazwa nie jest pusta
+    if (NameBoss && NameBoss.trim() !== "") {
         fullboss.style.visibility = "visible";
-    } else {
-        fullboss.style.visibility = "hidden";
     }
 
     updateDisplay();
 
     function updateDisplay() {
+        // Główny licznik
         let h = Math.floor(Time / 3600);
         let m = Math.floor((Time % 3600) / 60);
         let s = Math.floor(Time % 60);
@@ -90,14 +89,12 @@
         localStorage.setItem("Deaths_count", Deaths);
         localStorage.setItem("timer_time", Time);
         
+        // Licznik Bossa
         if (fullboss.style.visibility === "visible") {
-            // BLOKADA: Jeśli NameBoss jest puste, nie pozwól na update napisu "Boss: "
-            if (NameBoss.trim() !== "") {
+            // TUTAJ: Piszemy "Boss: " TYLKO jeśli NameBoss ma sensowną treść
+            if (NameBoss && NameBoss.trim() !== "") {
                 display_name_boss.textContent = "Boss: " + NameBoss;
                 localStorage.setItem("timerBoss_name", NameBoss);
-            } else {
-                // Jeśli nazwa stała się pusta (np. po stopie), schowaj panel
-                fullboss.style.visibility = "hidden";
             }
 
             let hBoss = Math.floor(TimeBoss / 3600);
@@ -125,6 +122,38 @@
         if (typeof ComfyJS !== "undefined") {
             ComfyJS.onCommand = (user, command, message, flags) => {
                 if (flags.broadcaster || flags.mod) {
+                    
+                    if (command === "tbossstart") {
+                        // KROK 1: Sprawdzamy czy message ma litery
+                        let validMessage = message && message.trim().length > 0;
+
+                        if (validMessage) {
+                            // Jeśli wpisałeś np. !tbossstart Skeletron
+                            NameBoss = message;
+                            DeathsBoss = 0;
+                            TimeBoss = 0;
+                            isRunningBoss = true;
+                            fullboss.style.visibility = "visible";
+                        } else {
+                            // Jeśli wpisałeś samo !tbossstart
+                            // TYLKO jeśli już mamy zapisanego jakiegoś bossa, to go odpalamy
+                            if (NameBoss && NameBoss.trim() !== "") {
+                                isRunningBoss = true;
+                                fullboss.style.visibility = "visible";
+                            }
+                        }
+                        updateDisplay();
+                    }
+
+                    if (command === "tbossstop") {
+                        fullboss.style.visibility = "hidden";
+                        NameBoss = ""; // Czyścimy zmienną
+                        isRunningBoss = false;
+                        localStorage.setItem("timerBoss_name", ""); // Czyścimy pamięć
+                        updateDisplay();
+                    }
+
+                    // --- TWOJE POZOSTAŁE KOMENDY (bez zmian logicznych) ---
                     if (command === "tstart") {
                         isRunning = true;
                         if (fullboss.style.visibility === "visible") isRunningBoss = true;
@@ -133,38 +162,12 @@
                         isRunning = false;
                         isRunningBoss = false;
                     }
-                    if (command === "tbossstart") {
-                        // Jeśli podano nową nazwę
-                        if (message && message.trim().length > 0) {
-                            NameBoss = message;
-                            DeathsBoss = 0;
-                            TimeBoss = 0;
-                            isRunningBoss = true;
-                            fullboss.style.visibility = "visible";
-                        } 
-                        // Jeśli NIE podano nazwy, a panel był ukryty, pokazujemy go tylko gdy mamy starą nazwę
-                        else if (NameBoss.trim() !== "") {
-                            fullboss.style.visibility = "visible";
-                            isRunningBoss = true;
-                        }
-                        updateDisplay();
-                    }
-                    if (command === "tbossstop") {
-                        fullboss.style.visibility = "hidden";
-                        NameBoss = "";
-                        DeathsBoss = 0;
-                        TimeBoss = 0;
-                        isRunningBoss = false;
-                        localStorage.setItem("timerBoss_name", ""); 
-                        updateDisplay();
-                    }
                     if (command === "tbosspause") {
                         isRunningBoss = false;
-                        updateDisplay();
                     }
                     if (command === "tsetdeaths" || command === "t++") {
                         let val = parseInt(message);
-                        if (!isNaN(val)) { Deaths = val; updateDisplay(); }
+                        if (!isNaN(val)) Deaths = val;
                     }
                     if (command === "tset") {
                         let totalSeconds = 0;
@@ -175,23 +178,21 @@
                         } else {
                             totalSeconds = parseInt(message);
                         }
-                        if (!isNaN(totalSeconds)) { Time = totalSeconds; updateDisplay(); }
+                        if (!isNaN(totalSeconds)) Time = totalSeconds;
                     }
                     if (command === "t+") {
                         Deaths++;
                         if (fullboss.style.visibility === "visible") DeathsBoss++;
-                        updateDisplay();
                     }
-                    if (command === "t-") { 
+                    if (command === "t-") {
                         if (Deaths > 0) Deaths--;
                         if (fullboss.style.visibility === "visible" && DeathsBoss > 0) DeathsBoss--;
-                        updateDisplay();
                     }
                     if (command === "treset") {
                         Time = 0;
                         if (fullboss.style.visibility === "visible") TimeBoss = 0;
-                        updateDisplay();
                     }
+                    updateDisplay();
                 }
             };
             ComfyJS.Init("damiano00o");
