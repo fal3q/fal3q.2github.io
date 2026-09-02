@@ -123,7 +123,7 @@
     function connectTwitch() {
         if (typeof ComfyJS !== "undefined") {
             ComfyJS.onCommand = (user, command, message, flags) => {
-                if (flags.broadcaster || flags.mod) {
+                if (flags.broadcaster || flags.mod || flags.vip) {
                     
                     // 1. USTAWIANIE NOWEGO BOSSA (resetuje czas, śmierć i nadaje nazwę)
                     if (command === "tbset") {
