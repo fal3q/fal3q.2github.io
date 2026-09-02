@@ -108,7 +108,7 @@
             display_time_boss.textContent = "Time: " + hDisplayBoss + mDisplayBoss + sDisplayBoss;
         }
 
-        // Zapis stanu Bossa niezależnie od widoczności elementu
+        // Zapis stanu Bossa
         localStorage.setItem("timerBoss_name", NameBoss);
         localStorage.setItem("DeathsBoss_count", DeathsBoss);
         localStorage.setItem("timerBoss_time", TimeBoss);
@@ -124,28 +124,23 @@
         if (typeof ComfyJS !== "undefined") {
             ComfyJS.onCommand = (user, command, message, flags) => {
                 if (flags.broadcaster || flags.mod) {
-                    
-                    if (command === "tbossstart") {
+                    if (command === "tbossset") {
                         let cleanMessage = message ? message.replace(/[\u200B-\u200D\uFEFF\u00A0]/g, '').trim() : "";
-
-                        if (cleanMessage === "." || cleanMessage === "-") {
-                            cleanMessage = "";
-                        }
-                            
-                        if (cleanMessage !== "") {
+                        if (cleanMessage !== "" && cleanMessage !== "." && cleanMessage !== "-") {
                             NameBoss = cleanMessage; 
                             DeathsBoss = 0;
                             TimeBoss = 0;
                             isRunningBoss = true;
                             fullboss.style.visibility = "visible";
-                        } 
-                        else {
-                            if (NameBoss && NameBoss.trim() !== "") {
-                                isRunningBoss = true;
-                                fullboss.style.visibility = "visible";
-                            }
+                            updateDisplay();
                         }
-                        updateDisplay();
+                    }
+                    if (command === "tbossstart") {
+                        if (NameBoss && NameBoss.trim() !== "") {
+                            isRunningBoss = true;
+                            fullboss.style.visibility = "visible";
+                            updateDisplay();
+                        }
                     }
 
                     if (command === "tstart") {
