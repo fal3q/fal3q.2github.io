@@ -200,7 +200,12 @@
                     if (command === "tfullreset") {
                         Time = 0;
                         Deaths = 0;
-                        if (fullboss.style.visibility === "visible") TimeBoss = 0;
+                        if (fullboss.style.visibility === "visible"){
+                            fullboss.style.visibility = "hidden";
+                            isRunningBoss = false;
+                            NameBoss = "";
+                            localStorage.setItem("timerBoss_name", "");
+                        }
                         updateDisplay();
                     }
                 }
