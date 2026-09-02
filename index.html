@@ -127,7 +127,11 @@
                 if (flags.broadcaster || flags.mod) {
                     
                     if (command === "tbossstart") {
-                        const cleanMessage = message ? message.trim() : "";
+                        let cleanMessage = message ? message.replace(/[\u200B-\u200D\uFEFF\u00A0]/g, '').trim() : "";
+
+                        if (cleanMessage === "." || cleanMessage === "-") {
+                            cleanMessage = "";
+                        }
                             
                         if (cleanMessage !== "") {
                             NameBoss = cleanMessage; 
@@ -135,7 +139,7 @@
                             TimeBoss = 0;
                             isRunningBoss = true;
                             fullboss.style.visibility = "visible";
-                                } 
+                        } 
                         else {
                             if (NameBoss && NameBoss.trim() !== "") {
                                 isRunningBoss = true;
