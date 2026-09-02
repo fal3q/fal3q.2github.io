@@ -6,14 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Timer</title>
     
-
     <style>
         @font-face {
-        font-family: 'MC-font';
-        src: url('MinecraftRegular-Bmg3.otf') format('truetype');
-        font-weight: normal;
-        font-style: normal;
-        font-display: swap;
+            font-family: 'MC-font';
+            src: url('MinecraftRegular-Bmg3.otf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
         }
         body {
             margin: 0;
@@ -34,7 +33,6 @@
         }
         .Boss{
             margin-top: 15px;
-
         }
         .TimerBoss, .DeathsBoss, .NameBoss{
             color: white;
@@ -95,8 +93,8 @@
         localStorage.setItem("Deaths_count", Deaths);
         localStorage.setItem("timer_time", Time);
         
-        // Sekcja Bossa
-        if (fullboss.style.visibility === "visible" && NameBoss.trim() !== "") {
+        // Sekcja Bossa - wyświetlanie
+        if (NameBoss && NameBoss.trim() !== "") {
             display_name_boss.textContent = "Boss: " + NameBoss;
             
             let hBoss = Math.floor(TimeBoss / 3600);
@@ -108,11 +106,12 @@
 
             display_deaths_boss.textContent = "Smierci: " + DeathsBoss;
             display_time_boss.textContent = "Time: " + hDisplayBoss + mDisplayBoss + sDisplayBoss;
-            
-            localStorage.setItem("timerBoss_name", NameBoss);
-            localStorage.setItem("DeathsBoss_count", DeathsBoss);
-            localStorage.setItem("timerBoss_time", TimeBoss);
         }
+
+        // Zapis stanu Bossa niezależnie od widoczności elementu
+        localStorage.setItem("timerBoss_name", NameBoss);
+        localStorage.setItem("DeathsBoss_count", DeathsBoss);
+        localStorage.setItem("timerBoss_time", TimeBoss);
     }
 
     function TimeUp() {
@@ -151,7 +150,7 @@
 
                     if (command === "tstart") {
                         isRunning = true;
-                        if (fullboss.style.visibility === "visible") isRunningBoss = true;
+                        if (fullboss.style.visibility === "visible" && NameBoss !== "") isRunningBoss = true;
                     }
                     if (command === "tstop") {
                         isRunning = false;
@@ -210,5 +209,4 @@
     connectTwitch();
 </script>
 </body>
-
 </html>
