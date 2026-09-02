@@ -124,7 +124,9 @@
         if (typeof ComfyJS !== "undefined") {
             ComfyJS.onCommand = (user, command, message, flags) => {
                 if (flags.broadcaster || flags.mod) {
-                    if (command === "tbossset") {
+                    
+                    // 1. USTAWIANIE NOWEGO BOSSA (resetuje czas, śmierć i nadaje nazwę)
+                    if (command === "tbset") {
                         let cleanMessage = message ? message.replace(/[\u200B-\u200D\uFEFF\u00A0]/g, '').trim() : "";
                         if (cleanMessage !== "" && cleanMessage !== "." && cleanMessage !== "-") {
                             NameBoss = cleanMessage; 
@@ -135,7 +137,9 @@
                             updateDisplay();
                         }
                     }
-                    if (command === "tbossstart") {
+
+                    // 2. WZNOWIENIE Z PAUZY (tylko wznawia, nie zmienia nazwy)
+                    if (command === "tbresume") {
                         if (NameBoss && NameBoss.trim() !== "") {
                             isRunningBoss = true;
                             fullboss.style.visibility = "visible";
@@ -151,14 +155,14 @@
                         isRunning = false;
                         isRunningBoss = false;
                     }
-                    if (command === "tbossstop") {
+                    if (command === "tbstop") {
                         fullboss.style.visibility = "hidden";
                         isRunningBoss = false;
                         NameBoss = "";
                         localStorage.setItem("timerBoss_name", "");
                         updateDisplay();
                     }
-                    if (command === "tbosspause") {
+                    if (command === "tbpause") {
                         isRunningBoss = false;
                         updateDisplay();
                     }
