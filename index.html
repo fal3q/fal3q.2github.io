@@ -146,6 +146,9 @@
                         if (NameBoss && NameBoss.trim() !== "") {
                             isRunningBoss = true;
                             fullboss.style.visibility = "visible";
+                            if(!isRunning){
+                                isRunning = true;
+                            }
                             updateDisplay();
                         }
                     }
