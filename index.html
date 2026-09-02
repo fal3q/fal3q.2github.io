@@ -183,12 +183,13 @@
                     }
                     if (command === "t+") {
                         Deaths++;
-                        if (fullboss.style.visibility === "visible") DeathsBoss++;
+                        if (fullboss.style.visibility === "visible" && isRunningBoss) DeathsBoss++;
                         updateDisplay();
                     }
+
                     if (command === "t-") {
                         Deaths--;
-                        if (fullboss.style.visibility === "visible") DeathsBoss--;
+                        if (fullboss.style.visibility === "visible" && isRunningBoss) DeathsBoss--;
                         updateDisplay();
                     }
                     if (command === "treset") {
